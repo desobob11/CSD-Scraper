@@ -183,14 +183,13 @@ final_df["VERSION_TIME"] = [version_stamp for i in range(len(final_df))]
 final_df["AESO_TIME"] = [last_update for i in range(len(final_df))]
 
 
-# TODO: Standardize output to SQL tables. Make it agnostic,
-#       so that users can easily upload to a database of their choice.
-#       Support would be good for:
-#       PG
-#       Oracle
-#       My SQL
-#       Derby
-#
+conn = pg.connect(database="postgres", user="postgres",
+            password="walterw123", host="localhost", port="5432")
+
+engine = sql.create_engine("postgresql://postgres:walterw123@localhost:5432/postgres")
+
+pd.DataFrame(final_df).to_sql(con=engine, schema="AESO", name="aeso_csd_t", index=False, if_exists="append")
+
 
 
 
