@@ -11,6 +11,7 @@ from PyQt6.QtCore import QObject
 from PyQt6.QtGui import QStandardItemModel
 from PyQt6.QtGui import *
 from PyQt6.QtCore import Qt
+from hlsm_back import Back_End
 import pathlib
 import sys
 import os
@@ -24,6 +25,10 @@ class hlsm_front():
     def __init__(self):
         self.BUTTON_WIDTH = 50
         self.BUTTON_HEIGHT = 25
+        self.tb = QTableView()
+        self.model = QStandardItemModel()
+        self.tb.setModel(self.model)
+        
 
     '''
         Create symbol QApplication and return it
@@ -62,18 +67,17 @@ class hlsm_front():
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)
     
-        tb = QTableView()
+
 
         columns = ["File Name", "Id"]
 
-        model = QStandardItemModel()
-        tb.setModel(model)
+
 
         for i in columns:
             item = QStandardItem(i)
             item.setEditable(False)
-            model.setColumnCount(4)
-            model.setHorizontalHeaderLabels(["File Name", "Alias", "Application", "Schema", "Table"])
+            self.model.setColumnCount(4)
+            self.model.setHorizontalHeaderLabels(["File Name", "Alias", "Application", "Schema", "Table"])
 
         '''
             Load in config data from file
@@ -91,7 +95,7 @@ class hlsm_front():
             for cell in i.split(":"):
                 item_row.append(QStandardItem(cell))
             confirmed_names.append(item_row[0].text())
-            model.appendRow(item_row)
+            self.model.appendRow(item_row)
         
 
         
@@ -110,13 +114,13 @@ class hlsm_front():
                 application = QStandardItem("")
                 schema = QStandardItem("")
                 table = QStandardItem("")
-                model.appendRow([name, alias, application, schema, table])
+                self.model.appendRow([name, alias, application, schema, table])
 
    
-        tb.setFixedWidth(575)
-        tb.setFixedHeight(500)
+        self.tb.setFixedWidth(575)
+        self.tb.setFixedHeight(500)
 
-        layout.addWidget(tb)
+        layout.addWidget(self.tb)
     
 
         view.setLayout(layout)

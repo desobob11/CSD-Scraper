@@ -1,3 +1,10 @@
+'''
+    949eb6c5d3061308be1382734d5e6df61d56b15c16b7db0cf85a75bfdc0a34b0
+'''
+'''
+    Above is a tag confirming that this scraper is written by me using the proper format.
+    This means that it will make this file visible to the SQL Driver setup application
+'''
 import bs4.element
 import numpy as np
 import pandas as pd
@@ -9,6 +16,11 @@ import requests
 import warnings
 import psycopg2 as pg
 import sqlalchemy as sql
+
+# 
+'''
+    949eb6c5d3061308be1382734d5e6df61d56b15c16b7db0cf85a75bfdc0a34b0
+'''
 
 warnings.simplefilter("ignore")
 
@@ -189,21 +201,3 @@ conn = pg.connect(database="postgres", user="postgres",
 engine = sql.create_engine("postgresql://postgres:walterw123@localhost:5432/postgres")
 
 pd.DataFrame(final_df).to_sql(con=engine, schema="AESO", name="aeso_csd_t", index=False, if_exists="append")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
