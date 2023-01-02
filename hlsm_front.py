@@ -28,7 +28,7 @@ class hlsm_front():
         self.tb = QTableView()
         self.model = QStandardItemModel()
         self.tb.setModel(self.model)
-        
+        self.state_file = "pickles/state.bin"
 
     '''
         Create symbol QApplication and return it
@@ -51,6 +51,83 @@ class hlsm_front():
                     scrapers.append(i)
         return scrapers
 
+    '''
+        def load_state(self) -> list[str]:
+            file_lines = None
+            with open(self.state_file, "rb") as src:
+                file_lines = src.readlines()
+            confirmed_names = []
+            for i in file_lines:
+                item_row = []
+                for cell in i.split(":"):
+                    item_row.append(QStandardItem(cell))
+                confirmed_names.append(item_row[0].text())
+                self.model.appendRow(item_row)
+            return confirmed_names
+    '''
+
+
+    def load_state(self) -> list[str]:
+        try:    
+            file_lines = None
+            file_contents = ""
+            with open(self.state_file, "rb") as src:
+                file_contents = Back_End.bin_decode(src)
+            file_lines = file_contents.split("\n")
+            print(file_lines)
+            confirmed_names = []
+            for i in file_lines:
+                item_row = []
+                for cell in i.split(":"):
+                    item_row.append(QStandardItem(cell))
+                confirmed_names.append(item_row[0].text())
+                self.model.appendRow(item_row)
+            return confirmed_names
+        except:
+            return None
+
+    def cross_check(self, files_in_dir: list[str], state_files: list[str]) -> None:
+            for i in files_in_dir:
+                if state_files is None:
+                    name = QStandardItem(i)
+                    alias = QStandardItem(" ")
+                    application = QStandardItem(" ")
+                    schema = QStandardItem(" ")
+                    table = QStandardItem(" ")
+                    self.model.appendRow([name, alias, application, schema, table])
+                elif i not in state_files:
+                    name = QStandardItem(i)
+                    alias = QStandardItem(" ")
+                    application = QStandardItem(" ")
+                    schema = QStandardItem(" ")
+                    table = QStandardItem(" ")
+                    self.model.appendRow([name, alias, application, schema, table])
+
+
+
+
+    def write_state(self) -> None:
+        file_contents = ""
+        for i in range(self.model.rowCount()):
+            str_row = ""
+            for j in range(self.model.columnCount()):
+                value = self.model.data(self.model.index(i, j))
+                if value is not None:
+                    str_row += value
+                    str_row += ":"
+            str_row = str_row.removesuffix(":")
+            str_row += "\n"
+            file_contents += str_row
+        file_contents = file_contents.strip()
+        
+        with open(self.state_file, "wb") as bin:
+            bin_list = Back_End.bin_encode(file_contents)
+            for i in bin_list:
+                bin.write(i)
+
+
+
+
 
 
     '''
@@ -67,11 +144,7 @@ class hlsm_front():
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)
     
-
-
         columns = ["File Name", "Id"]
-
-
 
         for i in columns:
             item = QStandardItem(i)
@@ -79,59 +152,20 @@ class hlsm_front():
             self.model.setColumnCount(4)
             self.model.setHorizontalHeaderLabels(["File Name", "Alias", "Application", "Schema", "Table"])
 
-        '''
-            Load in config data from file
-        '''
-        file_lines = None
-        with open("pickles/file.txt", "r") as src:
-            file_lines = src.readlines()
-        
-        '''
-            Fill the table view with the data
-        '''
-        confirmed_names = []
-        for i in file_lines:
-            item_row = []
-            for cell in i.split(":"):
-                item_row.append(QStandardItem(cell))
-            confirmed_names.append(item_row[0].text())
-            self.model.appendRow(item_row)
-        
-
-        
-  
-
+        state_files = self.load_state()
 
         '''
             Check for scrapers in the directory
         '''
         files = self.get_scrapers()
 
-        for i in files:
-            if i not in confirmed_names:
-                name = QStandardItem(i)
-                alias = QStandardItem("")
-                application = QStandardItem("")
-                schema = QStandardItem("")
-                table = QStandardItem("")
-                self.model.appendRow([name, alias, application, schema, table])
+        #self.cross_check(files, state_files)
 
-   
         self.tb.setFixedWidth(575)
         self.tb.setFixedHeight(500)
-
         layout.addWidget(self.tb)
-    
-
         view.setLayout(layout)
-
-
         view.setWindowTitle("HLSM - Main")
 
-        print(confirmed_names)
-        
         return view
-
-
-
 

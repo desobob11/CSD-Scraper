@@ -2,7 +2,35 @@ import os
 import sys
 import pathlib as path
 import io
+from hlsm_back import Back_End
 
+contents = "test:10:10:10:10"
+with open("pickles/state.bin", "wb") as bin:
+    for i in contents:
+        byte = (ord(i) + 100).to_bytes(1, byteorder="big", signed=False)
+        bin.write(byte)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'''
 def bin_encode(source: str, dest: str) -> None:
     with open("binary.txt", "r") as file:
         contents = file.read()
@@ -24,7 +52,7 @@ def bin_decode(source: str, dest: str) -> None:
             for i in arr:
                 char = chr(int.from_bytes(i, byteorder="big") - 100)
                 txt.write(char)
-
+'''
 
 
 
