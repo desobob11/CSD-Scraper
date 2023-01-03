@@ -3,12 +3,12 @@ import sys
 import pathlib as path
 import io
 from hlsm_back import Back_End
+import pickle
 
 contents = "test:10:10:10:10"
-with open("pickles/state.bin", "wb") as bin:
-    for i in contents:
-        byte = (ord(i) + 100).to_bytes(1, byteorder="big", signed=False)
-        bin.write(byte)
+with open("pickles/CSD-Scraper-Main.py.pickle", "rb") as pkl:
+    l = pickle.load(pkl)
+    print(l)
 
 
 

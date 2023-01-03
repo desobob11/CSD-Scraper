@@ -24,7 +24,7 @@ def main():
     main_view = front_end.main_view()
     main_view.show()
 
-    front_end.write_state()
+   # front_end.write_state()
 
     app.exec()
 

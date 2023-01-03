@@ -15,7 +15,8 @@ from hlsm_back import Back_End
 import pathlib
 import sys
 import os
-
+import pickle
+import sqlalchemy as sql
 
 class hlsm_front():
 
@@ -28,7 +29,7 @@ class hlsm_front():
         self.tb = QTableView()
         self.model = QStandardItemModel()
         self.tb.setModel(self.model)
-        self.state_file = "pickles/state.bin"
+        self.state_file = "state.bin"
 
     '''
         Create symbol QApplication and return it
@@ -51,20 +52,6 @@ class hlsm_front():
                     scrapers.append(i)
         return scrapers
 
-    '''
-        def load_state(self) -> list[str]:
-            file_lines = None
-            with open(self.state_file, "rb") as src:
-                file_lines = src.readlines()
-            confirmed_names = []
-            for i in file_lines:
-                item_row = []
-                for cell in i.split(":"):
-                    item_row.append(QStandardItem(cell))
-                confirmed_names.append(item_row[0].text())
-                self.model.appendRow(item_row)
-            return confirmed_names
-    '''
 
 
     def load_state(self) -> list[str]:
@@ -106,6 +93,33 @@ class hlsm_front():
 
 
 
+    def build_pickles(self) -> dict[str, list[str]]:
+        for i in range(self.model.rowCount()):
+            item_row = []
+            for j in range(self.model.columnCount()):
+                item_row.append(self.model.data(self.model.index(i, j)))
+
+            scraper_name = item_row[0]
+            driver_name = item_row[3]
+            uname = item_row[1]
+            pword = item_row[2]
+            address = item_row[4]
+            port = item_row[5]
+            database = item_row[6]
+
+            engine_text = "%s://%s:%s@%s:%s/%s" % (driver_name, uname, pword, address, port, database)
+
+            schema_and_table = (item_row[7], item_row[8])
+
+            config = (engine_text, schema_and_table)
+
+            with open("pickles/%s.pickle" % scraper_name, "wb") as pkl:
+                pickle.dump(config, pkl)
+
+
+
+
+
     def write_state(self) -> None:
         file_contents = ""
         for i in range(self.model.rowCount()):
@@ -124,11 +138,7 @@ class hlsm_front():
             bin_list = Back_End.bin_encode(file_contents)
             for i in bin_list:
                 bin.write(i)
-
-
-
-
-
+        self.build_pickles()
 
     '''
         Function for outlining the main view of the program,
@@ -139,18 +149,20 @@ class hlsm_front():
     '''
     def main_view(self) -> QWidget:
         view = QWidget()
-        view.setFixedWidth(600)
+        view.setFixedWidth(1000)
         view.setFixedHeight(600)
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        fname = __file__
+        print(fname.split("\\"))
     
-        columns = ["File Name", "Id"]
 
-        for i in columns:
-            item = QStandardItem(i)
-            item.setEditable(False)
-            self.model.setColumnCount(4)
-            self.model.setHorizontalHeaderLabels(["File Name", "Alias", "Application", "Schema", "Table"])
+
+
+
+        self.model.setColumnCount(9)
+        self.model.setHorizontalHeaderLabels(["File Name", "Username", "Password",
+                                             "Driver", "Address", "Port", "Database", "Schema", "Table"])
 
         state_files = self.load_state()
 
@@ -159,13 +171,22 @@ class hlsm_front():
         '''
         files = self.get_scrapers()
 
-        #self.cross_check(files, state_files)
+        self.cross_check(files, state_files)
 
-        self.tb.setFixedWidth(575)
+        self.tb.setFixedWidth(975)
         self.tb.setFixedHeight(500)
         layout.addWidget(self.tb)
         view.setLayout(layout)
         view.setWindowTitle("HLSM - Main")
 
+        save = QPushButton()
+        save.setText("Save")
+        save.clicked.connect(self.write_state)
+
+        cancel = QPushButton()
+        cancel.setText("Cancel")
+
+        layout.addWidget(save)
+        layout.addWidget(cancel)
         return view
 
